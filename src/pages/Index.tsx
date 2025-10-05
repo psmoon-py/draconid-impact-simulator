@@ -1,6 +1,6 @@
 import { Hero } from "@/components/Hero";
 import { OrbitViewer } from "@/components/OrbitViewer";
-import { ImpactSimulator } from "@/components/ImpactSimulator";
+import { EnhancedImpactSimulator } from "@/components/EnhancedImpactSimulator";
 import { NASADataFeed } from "@/components/NASADataFeed";
 import { EducationalPanel } from "@/components/EducationalPanel";
 import { Separator } from "@/components/ui/separator";
@@ -29,8 +29,8 @@ const Index = () => {
 
           <Separator className="bg-border/50" />
 
-          {/* Impact Simulator */}
-          <ImpactSimulator />
+          {/* Enhanced Impact Simulator */}
+          <EnhancedImpactSimulator />
 
           <Separator className="bg-border/50" />
 
