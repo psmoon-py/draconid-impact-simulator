@@ -36,8 +36,8 @@ export const Hero = () => {
         {/* Logo */}
         <div className="flex justify-center mb-8 animate-in fade-in slide-in-from-top duration-700">
           <img 
-            src="/src/assets/draconid-logo.png" 
-            alt="Draconid Logo" 
+            src="/src/assets/draconid-animated.gif" 
+            alt="Draconid Meteor Shower" 
             className="w-32 h-32 md:w-40 md:h-40 object-contain drop-shadow-[0_0_40px_rgba(0,217,255,0.6)]"
           />
         </div>
@@ -49,13 +49,13 @@ export const Hero = () => {
 
         {/* Subtitle */}
         <p className="text-xl md:text-2xl lg:text-3xl text-muted-foreground font-light max-w-3xl mx-auto animate-in fade-in slide-in-from-top duration-700 delay-200">
-          Planetary Defense Simulator
+          Interactive Asteroid Impact Simulator
         </p>
 
         {/* Description */}
         <p className="text-base md:text-lg text-foreground/80 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-top duration-700 delay-300">
-          Explore asteroid impact scenarios with real NASA data. Visualize orbital mechanics,
-          predict consequences, and test planetary defense strategies in this interactive simulation.
+          Launch asteroids, witness realistic impacts, and explore planetary defense strategies 
+          with live NASA data and cutting-edge 3D visualizations.
         </p>
 
         {/* Feature Pills */}

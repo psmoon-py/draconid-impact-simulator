@@ -5,8 +5,9 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { MITIGATION_STRATEGIES } from "@/types/asteroid";
 import { calculateMissionSuccessProbability } from "@/utils/advancedImpactCalculations";
-import { Rocket, Target, Sparkles, Zap, Check, X, Clock, DollarSign } from "lucide-react";
+import { Rocket, Target, Sparkles, Zap, Check, X, Clock, DollarSign, Radio, Orbit, Flame } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { MitigationExplanation } from "./MitigationExplanation";
 
 interface MitigationPlannerProps {
   asteroidDiameter: number;
@@ -17,6 +18,7 @@ interface MitigationPlannerProps {
 export const MitigationPlanner = ({ asteroidDiameter, impactEnergy, leadTimeDays: initialLeadTime }: MitigationPlannerProps) => {
   const [selectedStrategy, setSelectedStrategy] = useState(MITIGATION_STRATEGIES[0]);
   const [leadTimeDays, setLeadTimeDays] = useState([initialLeadTime]);
+  const [showExplanation, setShowExplanation] = useState(false);
 
   const successProbability = calculateMissionSuccessProbability(
     leadTimeDays[0],
@@ -30,6 +32,10 @@ export const MitigationPlanner = ({ asteroidDiameter, impactEnergy, leadTimeDays
       case 'gravity': return Target;
       case 'nuclear': return Zap;
       case 'laser': return Sparkles;
+      case 'ion-beam': return Radio;
+      case 'mass-driver': return Orbit;
+      case 'solar-sail': return Flame;
+      case 'fragmentation': return Zap;
       default: return Rocket;
     }
   };
@@ -71,7 +77,7 @@ export const MitigationPlanner = ({ asteroidDiameter, impactEnergy, leadTimeDays
       </Card>
 
       {/* Strategy Selection */}
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {MITIGATION_STRATEGIES.map((strategy) => {
           const Icon = getStrategyIcon(strategy.id);
           const isSelected = selectedStrategy.id === strategy.id;
@@ -203,13 +209,24 @@ export const MitigationPlanner = ({ asteroidDiameter, impactEnergy, leadTimeDays
           <Button
             className="w-full"
             size="lg"
-            disabled={!canExecute}
+            onClick={() => setShowExplanation(true)}
           >
             <Rocket className="mr-2 w-5 h-5" />
-            {canExecute ? 'Initiate Mission Planning' : 'Insufficient Lead Time'}
+            Simulate Mission Outcome
           </Button>
         </div>
       </Card>
+
+      {/* Mission Outcome Explanation */}
+      {showExplanation && (
+        <MitigationExplanation
+          strategy={selectedStrategy.id}
+          success={canExecute && successProbability > 0.5}
+          probability={successProbability}
+          asteroidSize={asteroidDiameter}
+          leadTime={leadTimeDays[0]}
+        />
+      )}
 
       {/* Educational Note */}
       <Card className="p-4 bg-muted/30 border-muted">

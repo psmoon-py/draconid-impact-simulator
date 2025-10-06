@@ -1,5 +1,5 @@
 import { Hero } from "@/components/Hero";
-import { OrbitViewer } from "@/components/OrbitViewer";
+import { SolarSystemViewer } from "@/components/SolarSystemViewer";
 import { EnhancedImpactSimulator } from "@/components/EnhancedImpactSimulator";
 import { NASADataFeed } from "@/components/NASADataFeed";
 import { EducationalPanel } from "@/components/EducationalPanel";
@@ -14,18 +14,8 @@ const Index = () => {
       {/* Simulator Section */}
       <section id="simulator" className="py-20 px-4">
         <div className="max-w-7xl mx-auto space-y-16">
-          {/* 3D Orbit Viewer */}
-          <div className="space-y-6">
-            <div className="text-center space-y-2">
-              <h2 className="text-3xl md:text-4xl font-bold text-gradient">
-                Orbital Mechanics
-              </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Interactive 3D visualization of asteroid trajectories and Earth's orbital mechanics
-              </p>
-            </div>
-            <OrbitViewer />
-          </div>
+          {/* Live Solar System Tracker */}
+          <SolarSystemViewer />
 
           <Separator className="bg-border/50" />
 
@@ -61,7 +51,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto text-center space-y-4">
           <div className="flex justify-center">
             <img 
-              src="/src/assets/draconid-logo.png" 
+              src="/src/assets/draconid-animated.gif" 
               alt="Draconid Logo" 
               className="w-16 h-16 object-contain opacity-70"
             />
