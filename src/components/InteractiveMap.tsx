@@ -91,10 +91,7 @@ export const InteractiveMap = ({ impactZones, onLocationSelect }: InteractiveMap
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           />
-          
           <LocationSelector onLocationSelect={handleLocationSelect} />
-          
-          {/* Impact Point Marker */}
           <Marker position={targetLocation}>
             <Popup>
               <div className="text-center">
@@ -106,52 +103,41 @@ export const InteractiveMap = ({ impactZones, onLocationSelect }: InteractiveMap
               </div>
             </Popup>
           </Marker>
-
-          {/* Impact Zones */}
-          {impactZones && (
-            <>
-              {/* Crater Zone */}
-              <Circle
-                center={targetLocation}
-                radius={impactZones.crater}
-                pathOptions={{
-                  color: '#ff4444',
-                  fillColor: '#ff4444',
-                  fillOpacity: 0.4,
-                  weight: 2,
-                }}
-              >
-                <Popup>Crater Zone: {(impactZones.crater / 1000).toFixed(2)} km</Popup>
-              </Circle>
-
-              {/* Blast Zone */}
-              <Circle
-                center={targetLocation}
-                radius={impactZones.blast}
-                pathOptions={{
-                  color: '#ff8800',
-                  fillColor: '#ff8800',
-                  fillOpacity: 0.2,
-                  weight: 2,
-                }}
-              >
-                <Popup>Blast Zone: {(impactZones.blast / 1000).toFixed(2)} km</Popup>
-              </Circle>
-
-              {/* Thermal Zone */}
-              <Circle
-                center={targetLocation}
-                radius={impactZones.thermal}
-                pathOptions={{
-                  color: '#ffaa00',
-                  fillColor: '#ffaa00',
-                  fillOpacity: 0.15,
-                  weight: 2,
-                }}
-              >
-                <Popup>Thermal Radiation Zone: {(impactZones.thermal / 1000).toFixed(2)} km</Popup>
-              </Circle>
-            </>
+          {impactZones && impactZones.crater > 0 && (
+            <Circle
+              center={targetLocation}
+              radius={impactZones.crater}
+              pathOptions={{
+                color: '#ff4444',
+                fillColor: '#ff4444',
+                fillOpacity: 0.4,
+                weight: 2,
+              }}
+            />
+          )}
+          {impactZones && impactZones.blast > 0 && (
+            <Circle
+              center={targetLocation}
+              radius={impactZones.blast}
+              pathOptions={{
+                color: '#ff8800',
+                fillColor: '#ff8800',
+                fillOpacity: 0.2,
+                weight: 2,
+              }}
+            />
+          )}
+          {impactZones && impactZones.thermal > 0 && (
+            <Circle
+              center={targetLocation}
+              radius={impactZones.thermal}
+              pathOptions={{
+                color: '#ffaa00',
+                fillColor: '#ffaa00',
+                fillOpacity: 0.15,
+                weight: 2,
+              }}
+            />
           )}
         </MapContainer>
       </div>
