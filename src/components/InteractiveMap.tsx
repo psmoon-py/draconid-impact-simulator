@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Circle, Marker, Popup, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Target } from 'lucide-react';
 
 // Fix for default marker icons in Leaflet
+// (Leaflet defaults expect images to be at specific URLs)
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -23,34 +23,188 @@ interface InteractiveMapProps {
   onLocationSelect: (lat: number, lng: number, locationName: string) => void;
 }
 
-function LocationSelector({ onLocationSelect }: { onLocationSelect: (lat: number, lng: number) => void }) {
-  useMapEvents({
-    click: (e) => {
-      onLocationSelect(e.latlng.lat, e.latlng.lng);
-    },
-  });
-  return null;
-}
-
 export const InteractiveMap = ({ impactZones, onLocationSelect }: InteractiveMapProps) => {
+  const mapElRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const markerRef = useRef<L.Marker | null>(null);
+  const craterCircleRef = useRef<L.Circle | null>(null);
+  const blastCircleRef = useRef<L.Circle | null>(null);
+  const thermalCircleRef = useRef<L.Circle | null>(null);
+
   const [targetLocation, setTargetLocation] = useState<[number, number]>([40.7128, -74.0060]); // NYC default
   const [locationName, setLocationName] = useState('New York City');
 
-  const handleLocationSelect = async (lat: number, lng: number) => {
+  // Initialize map once
+  useEffect(() => {
+    if (mapRef.current || !mapElRef.current) return;
+
+    const map = L.map(mapElRef.current, {
+      center: targetLocation,
+      zoom: 6,
+      zoomControl: true,
+      preferCanvas: true,
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap',
+    }).addTo(map);
+
+    // Initial marker
+    markerRef.current = L.marker(targetLocation).addTo(map).bindPopup(
+      `<div style="text-align:center">
+        <p style="font-weight:600;color:var(--destructive, #ef4444)">Impact Point</p>
+        <p style="font-size:12px">${locationName}</p>
+        <p style="font-size:12px;opacity:.7">${targetLocation[0].toFixed(4)}°, ${targetLocation[1].toFixed(4)}°</p>
+      </div>`
+    );
+
+    // Click to choose location
+    map.on('click', async (e: L.LeafletMouseEvent) => {
+      await handleLocationSelect(e.latlng.lat, e.latlng.lng, map);
+    });
+
+    mapRef.current = map;
+  }, []);
+
+  // Update map view when targetLocation changes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.setView(targetLocation, map.getZoom());
+
+    // Update marker
+    if (!markerRef.current) {
+      markerRef.current = L.marker(targetLocation).addTo(map);
+    } else {
+      markerRef.current.setLatLng(targetLocation);
+    }
+    markerRef.current.bindPopup(
+      `<div style="text-align:center">
+        <p style="font-weight:600;color:var(--destructive, #ef4444)">Impact Point</p>
+        <p style="font-size:12px">${locationName}</p>
+        <p style="font-size:12px;opacity:.7">${targetLocation[0].toFixed(4)}°, ${targetLocation[1].toFixed(4)}°</p>
+      </div>`
+    );
+  }, [targetLocation, locationName]);
+
+  // Draw/update impact zones
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    // Helper to create or update circle
+    const upsertCircle = (
+      circleRef: React.MutableRefObject<L.Circle | null>,
+      radius: number,
+      color: string,
+      fillOpacity: number
+    ) => {
+      if (radius <= 0) {
+        if (circleRef.current) {
+          map.removeLayer(circleRef.current);
+          circleRef.current = { current: null } as any; // ensure clean
+        }
+        return;
+      }
+      if (!circleRef.current) {
+        circleRef.current = circleRef as any; // TS helper
+      }
+      if (!circleRef.current) return;
+      if (!circleRef.current) return;
+      if (!circleRef.current) return;
+      if (!circleRef.current) return;
+      // Create if missing
+      if (!circleRef.current) {
+        circleRef.current = L.circle(targetLocation, {
+          radius,
+          color,
+          weight: 2,
+          fillColor: color,
+          fillOpacity,
+        }).addTo(map);
+      } else {
+        circleRef.current.setLatLng(targetLocation);
+        circleRef.current.setRadius(radius);
+        circleRef.current.setStyle({ color, fillColor: color, fillOpacity, weight: 2 });
+      }
+    };
+
+    // Clear existing circles if no impactZones
+    if (!impactZones) {
+      [craterCircleRef, blastCircleRef, thermalCircleRef].forEach(ref => {
+        if (ref.current) {
+          map.removeLayer(ref.current);
+          ref.current = null;
+        }
+      });
+      return;
+    }
+
+    // Update circles
+    if (!craterCircleRef.current) {
+      craterCircleRef.current = L.circle(targetLocation, {
+        radius: impactZones.crater,
+        color: '#ff4444',
+        weight: 2,
+        fillColor: '#ff4444',
+        fillOpacity: 0.4,
+      }).addTo(map);
+    } else {
+      craterCircleRef.current.setLatLng(targetLocation);
+      craterCircleRef.current.setRadius(impactZones.crater);
+      craterCircleRef.current.setStyle({ color: '#ff4444', fillColor: '#ff4444', fillOpacity: 0.4, weight: 2 });
+    }
+
+    if (!blastCircleRef.current) {
+      blastCircleRef.current = L.circle(targetLocation, {
+        radius: impactZones.blast,
+        color: '#ff8800',
+        weight: 2,
+        fillColor: '#ff8800',
+        fillOpacity: 0.2,
+      }).addTo(map);
+    } else {
+      blastCircleRef.current.setLatLng(targetLocation);
+      blastCircleRef.current.setRadius(impactZones.blast);
+      blastCircleRef.current.setStyle({ color: '#ff8800', fillColor: '#ff8800', fillOpacity: 0.2, weight: 2 });
+    }
+
+    if (!thermalCircleRef.current) {
+      thermalCircleRef.current = L.circle(targetLocation, {
+        radius: impactZones.thermal,
+        color: '#ffaa00',
+        weight: 2,
+        fillColor: '#ffaa00',
+        fillOpacity: 0.15,
+      }).addTo(map);
+    } else {
+      thermalCircleRef.current.setLatLng(targetLocation);
+      thermalCircleRef.current.setRadius(impactZones.thermal);
+      thermalCircleRef.current.setStyle({ color: '#ffaa00', fillColor: '#ffaa00', fillOpacity: 0.15, weight: 2 });
+    }
+  }, [impactZones, targetLocation]);
+
+  const handleLocationSelect = async (lat: number, lng: number, map?: L.Map) => {
     setTargetLocation([lat, lng]);
-    
+
     // Reverse geocoding to get location name
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
       );
       const data = await response.json();
-      const name = data.display_name.split(',')[0] || 'Selected Location';
+      const name = (data.display_name?.split(',')[0] as string) || 'Selected Location';
       setLocationName(name);
       onLocationSelect(lat, lng, name);
     } catch (error) {
       setLocationName('Selected Location');
       onLocationSelect(lat, lng, 'Selected Location');
+    }
+
+    if (map) {
+      map.setView([lat, lng]);
+    } else if (mapRef.current) {
+      mapRef.current.setView([lat, lng]);
     }
   };
 
@@ -80,66 +234,8 @@ export const InteractiveMap = ({ impactZones, onLocationSelect }: InteractiveMap
       </div>
 
       {/* Map Container */}
-      <div className="h-[500px] rounded-xl overflow-hidden cosmic-border">
-        <MapContainer
-          center={targetLocation}
-          zoom={6}
-          style={{ height: '100%', width: '100%', background: '#0a0e27' }}
-          className="z-0"
-        >
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          />
-          <LocationSelector onLocationSelect={handleLocationSelect} />
-          <Marker position={targetLocation}>
-            <Popup>
-              <div className="text-center">
-                <p className="font-semibold text-destructive">Impact Point</p>
-                <p className="text-xs">{locationName}</p>
-                <p className="text-xs text-muted-foreground">
-                  {targetLocation[0].toFixed(4)}°, {targetLocation[1].toFixed(4)}°
-                </p>
-              </div>
-            </Popup>
-          </Marker>
-          {impactZones && impactZones.crater > 0 && (
-            <Circle
-              center={targetLocation}
-              radius={impactZones.crater}
-              pathOptions={{
-                color: '#ff4444',
-                fillColor: '#ff4444',
-                fillOpacity: 0.4,
-                weight: 2,
-              }}
-            />
-          )}
-          {impactZones && impactZones.blast > 0 && (
-            <Circle
-              center={targetLocation}
-              radius={impactZones.blast}
-              pathOptions={{
-                color: '#ff8800',
-                fillColor: '#ff8800',
-                fillOpacity: 0.2,
-                weight: 2,
-              }}
-            />
-          )}
-          {impactZones && impactZones.thermal > 0 && (
-            <Circle
-              center={targetLocation}
-              radius={impactZones.thermal}
-              pathOptions={{
-                color: '#ffaa00',
-                fillColor: '#ffaa00',
-                fillOpacity: 0.15,
-                weight: 2,
-              }}
-            />
-          )}
-        </MapContainer>
+      <div className="h-[500px] rounded-xl overflow-hidden cosmic-border" style={{ background: '#0a0e27' }}>
+        <div ref={mapElRef} style={{ height: '100%', width: '100%' }} />
       </div>
 
       {/* Instructions */}
