@@ -86,12 +86,19 @@ export const EnhancedImpactSimulator = () => {
         </p>
       </div>
 
-      <Tabs defaultValue="configure" className="w-full">
+      <Tabs defaultValue="target" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="configure">Configure Asteroid</TabsTrigger>
-          <TabsTrigger value="target">Select Target</TabsTrigger>
-          <TabsTrigger value="results" disabled={!results}>Impact Results</TabsTrigger>
+          <TabsTrigger value="target">1. Select Target</TabsTrigger>
+          <TabsTrigger value="configure">2. Configure Asteroid</TabsTrigger>
+          <TabsTrigger value="results" disabled={!results}>3. Impact Results</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="target" className="space-y-6">
+          <InteractiveMap
+            impactZones={impactZones}
+            onLocationSelect={handleLocationSelect}
+          />
+        </TabsContent>
 
         <TabsContent value="configure" className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
@@ -229,17 +236,18 @@ export const EnhancedImpactSimulator = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="target" className="space-y-6">
-          <InteractiveMap
-            impactZones={impactZones}
-            onLocationSelect={handleLocationSelect}
-          />
-        </TabsContent>
-
         <TabsContent value="results" className="space-y-6">
           {results && (
             <>
-              <ImpactResults results={results} location={location} />
+              <ImpactResults 
+                results={results} 
+                location={{
+                  lat: location.lat,
+                  lng: location.lng,
+                  name: location.name,
+                  type: location.type
+                }} 
+              />
               <MitigationPlanner
                 asteroidDiameter={diameter[0]}
                 impactEnergy={results.energyMegatons}

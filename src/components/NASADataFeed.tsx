@@ -84,6 +84,12 @@ export const NASADataFeed = () => {
     );
   }
 
+  const handleAsteroidClick = (asteroidName: string) => {
+    const encodedName = encodeURIComponent(asteroidName.replace(/[()]/g, '').trim());
+    const url = `https://echo.jpl.nasa.gov/Browser/index.html?object=${encodedName}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <div className="w-full space-y-4">
       <div className="flex items-center justify-between">
@@ -101,11 +107,12 @@ export const NASADataFeed = () => {
         {asteroids.map((asteroid, index) => (
           <Card 
             key={asteroid.id}
+            onClick={() => handleAsteroidClick(asteroid.name)}
             className={`p-4 hover-glow transition-all cursor-pointer ${
               asteroid.isPotentiallyHazardous 
                 ? 'bg-destructive/5 border-destructive/30' 
                 : 'bg-card/50 border-primary/20'
-            } backdrop-blur-sm`}
+            } backdrop-blur-sm hover:scale-[1.02]`}
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 space-y-2">

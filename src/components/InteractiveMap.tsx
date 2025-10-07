@@ -21,9 +21,10 @@ interface ImpactZones {
 interface InteractiveMapProps {
   impactZones?: ImpactZones;
   onLocationSelect: (lat: number, lng: number, locationName: string) => void;
+  initialLocation?: { lat: number; lng: number; name: string };
 }
 
-export const InteractiveMap = ({ impactZones, onLocationSelect }: InteractiveMapProps) => {
+export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation }: InteractiveMapProps) => {
   const mapElRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -31,8 +32,10 @@ export const InteractiveMap = ({ impactZones, onLocationSelect }: InteractiveMap
   const blastCircleRef = useRef<L.Circle | null>(null);
   const thermalCircleRef = useRef<L.Circle | null>(null);
 
-  const [targetLocation, setTargetLocation] = useState<[number, number]>([40.7128, -74.0060]); // NYC default
-  const [locationName, setLocationName] = useState('New York City');
+  const [targetLocation, setTargetLocation] = useState<[number, number]>(
+    initialLocation ? [initialLocation.lat, initialLocation.lng] : [40.7128, -74.0060]
+  );
+  const [locationName, setLocationName] = useState(initialLocation?.name || 'New York City');
 
   // Initialize map once
   useEffect(() => {
@@ -140,7 +143,7 @@ export const InteractiveMap = ({ impactZones, onLocationSelect }: InteractiveMap
       return;
     }
 
-    // Update circles
+    // Update circles with tooltips
     if (!craterCircleRef.current) {
       craterCircleRef.current = L.circle(targetLocation, {
         radius: impactZones.crater,
@@ -148,7 +151,10 @@ export const InteractiveMap = ({ impactZones, onLocationSelect }: InteractiveMap
         weight: 2,
         fillColor: '#ff4444',
         fillOpacity: 0.4,
-      }).addTo(map);
+      }).addTo(map).bindTooltip(
+        '<strong style="color:#ff4444">Crater Zone</strong><br/>Complete devastation<br/>Total destruction of all structures',
+        { permanent: false, sticky: true }
+      );
     } else {
       craterCircleRef.current.setLatLng(targetLocation);
       craterCircleRef.current.setRadius(impactZones.crater);
@@ -162,7 +168,10 @@ export const InteractiveMap = ({ impactZones, onLocationSelect }: InteractiveMap
         weight: 2,
         fillColor: '#ff8800',
         fillOpacity: 0.2,
-      }).addTo(map);
+      }).addTo(map).bindTooltip(
+        '<strong style="color:#ff8800">Blast Zone</strong><br/>Severe structural damage<br/>Building collapse, high casualties',
+        { permanent: false, sticky: true }
+      );
     } else {
       blastCircleRef.current.setLatLng(targetLocation);
       blastCircleRef.current.setRadius(impactZones.blast);
@@ -176,7 +185,10 @@ export const InteractiveMap = ({ impactZones, onLocationSelect }: InteractiveMap
         weight: 2,
         fillColor: '#ffaa00',
         fillOpacity: 0.15,
-      }).addTo(map);
+      }).addTo(map).bindTooltip(
+        '<strong style="color:#ffaa00">Thermal Zone</strong><br/>3rd degree burns<br/>Fires ignited, heat radiation damage',
+        { permanent: false, sticky: true }
+      );
     } else {
       thermalCircleRef.current.setLatLng(targetLocation);
       thermalCircleRef.current.setRadius(impactZones.thermal);
