@@ -36,7 +36,7 @@ export const Hero = () => {
         {/* Logo */}
         <div className="flex justify-center mb-8 animate-in fade-in slide-in-from-top duration-700">
           <img 
-            src="/src/assets/draconid-animated.gif" 
+            src="/assets/draconid-animated.gif" 
             alt="Draconid Meteor Shower" 
             className="w-32 h-32 md:w-40 md:h-40 object-contain drop-shadow-[0_0_40px_rgba(0,217,255,0.6)]"
           />

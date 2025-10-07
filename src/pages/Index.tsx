@@ -51,7 +51,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto text-center space-y-4">
           <div className="flex justify-center">
             <img 
-              src="/src/assets/draconid-animated.gif" 
+              src="/assets/draconid-animated.gif" 
               alt="Draconid Logo" 
               className="w-16 h-16 object-contain opacity-70"
             />
