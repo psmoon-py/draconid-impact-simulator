@@ -12,6 +12,7 @@ interface Asteroid {
   missDistance: number;
   isPotentiallyHazardous: boolean;
   closeApproachDate: string;
+  nasaJplUrl?: string;
 }
 
 const NASA_API_KEY = "qii1L8IW1FYWR5akqTASXp0kD7rfVZMssSg60ApD";
@@ -56,7 +57,8 @@ export const NASADataFeed = () => {
             velocity: parseFloat(closeApproach.relative_velocity.kilometers_per_second),
             missDistance: parseFloat(closeApproach.miss_distance.kilometers),
             isPotentiallyHazardous: asteroid.is_potentially_hazardous_asteroid,
-            closeApproachDate: closeApproach.close_approach_date
+            closeApproachDate: closeApproach.close_approach_date,
+            nasaJplUrl: asteroid.nasa_jpl_url // Store the official NASA JPL URL
           });
         });
       });
@@ -84,10 +86,11 @@ export const NASADataFeed = () => {
     );
   }
 
-  const handleAsteroidClick = (asteroidName: string) => {
-    const encodedName = encodeURIComponent(asteroidName.replace(/[()]/g, '').trim());
-    const url = `https://echo.jpl.nasa.gov/Browser/index.html?object=${encodedName}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
+  const handleAsteroidClick = (asteroid: Asteroid) => {
+    // Use the official NASA JPL URL from the API response
+    if (asteroid.nasaJplUrl) {
+      window.open(asteroid.nasaJplUrl, '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (
@@ -107,7 +110,7 @@ export const NASADataFeed = () => {
         {asteroids.map((asteroid, index) => (
           <Card 
             key={asteroid.id}
-            onClick={() => handleAsteroidClick(asteroid.name)}
+            onClick={() => handleAsteroidClick(asteroid)}
             className={`p-4 hover-glow transition-all cursor-pointer ${
               asteroid.isPotentiallyHazardous 
                 ? 'bg-destructive/5 border-destructive/30' 

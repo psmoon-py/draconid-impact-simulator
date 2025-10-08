@@ -37,8 +37,8 @@ export const ImpactResults = ({ results, location }: ImpactResultsProps) => {
   };
 
   const downloadPDF = async () => {
+    const toastId = toast.loading("Generating PDF report...");
     try {
-      toast.loading("Generating PDF report...");
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
@@ -119,11 +119,11 @@ export const ImpactResults = ({ results, location }: ImpactResultsProps) => {
       pdf.text(new Date().toLocaleDateString(), pageWidth / 2, pageHeight - 5, { align: 'center' });
       
       pdf.save(`impact-report-${location.name.replace(/\s+/g, '-')}.pdf`);
-      toast.dismiss();
+      toast.dismiss(toastId);
       toast.success("PDF downloaded successfully!");
     } catch (error) {
       console.error('Error generating PDF:', error);
-      toast.dismiss();
+      toast.dismiss(toastId);
       toast.error("Failed to generate PDF");
     }
   };
@@ -146,8 +146,8 @@ export const ImpactResults = ({ results, location }: ImpactResultsProps) => {
         </div>
         <InteractiveMap
           impactZones={impactZones}
-          onLocationSelect={() => {}}
           initialLocation={{ lat: location.lat, lng: location.lng, name: location.name }}
+          readOnly={true}
         />
         <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           <div className="flex items-center gap-2 p-3 rounded-lg bg-card/50">

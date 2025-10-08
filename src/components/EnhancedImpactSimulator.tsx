@@ -95,8 +95,8 @@ export const EnhancedImpactSimulator = () => {
 
         <TabsContent value="target" className="space-y-6">
           <InteractiveMap
-            impactZones={impactZones}
             onLocationSelect={handleLocationSelect}
+            key="target-selector"
           />
         </TabsContent>
 
@@ -213,9 +213,12 @@ export const EnhancedImpactSimulator = () => {
                       {((4/3) * Math.PI * Math.pow(diameter[0]/2, 3) * selectedMaterial.density / 1e9).toFixed(2)} million tons
                     </span>
                   </div>
-                  <div className="flex justify-between p-2 rounded bg-card/50">
-                    <span className="text-muted-foreground">Target:</span>
-                    <span className="font-mono">{location.name}</span>
+                  <div className="flex flex-col gap-1 p-2 rounded bg-card/50">
+                    <span className="text-muted-foreground">Target Location:</span>
+                    <span className="font-mono text-primary">{location.name}</span>
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {location.lat.toFixed(4)}°, {location.lng.toFixed(4)}°
+                    </span>
                   </div>
                   <div className="flex justify-between p-2 rounded bg-card/50">
                     <span className="text-muted-foreground">Location Type:</span>

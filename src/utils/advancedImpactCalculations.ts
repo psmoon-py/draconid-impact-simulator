@@ -66,11 +66,62 @@ export function calculateDetailedImpact(params: AsteroidParameters): DetailedImp
     tsunamiTravelTime = 30; // minutes (very rough)
   }
   
-  // Population impact estimation (simplified)
-  const urbanDensity = 1000; // people per km²
+  // Population impact estimation based on actual location
+  // Population density varies dramatically by location
+  const getPopulationDensity = (lat: number, lng: number): number => {
+    // Major cities and their approximate densities (people per km²)
+    const cities = [
+      { lat: 35.6762, lng: 139.6503, density: 6158, name: 'Tokyo' },
+      { lat: 28.7041, lng: 77.1025, density: 11320, name: 'Delhi' },
+      { lat: 40.7128, lng: -74.0060, density: 10947, name: 'New York' },
+      { lat: 19.0760, lng: 72.8777, density: 20694, name: 'Mumbai' },
+      { lat: 51.5074, lng: -0.1278, density: 5701, name: 'London' },
+      { lat: -33.8688, lng: 151.2093, density: 2058, name: 'Sydney' },
+      { lat: 55.7558, lng: 37.6173, density: 4822, name: 'Moscow' },
+      { lat: 31.2304, lng: 121.4737, density: 3816, name: 'Shanghai' },
+      { lat: 39.9042, lng: 116.4074, density: 1311, name: 'Beijing' },
+      { lat: -23.5505, lng: -46.6333, density: 7821, name: 'São Paulo' },
+    ];
+    
+    // Find closest major city within 100km
+    let closestCity = null;
+    let minDistance = Infinity;
+    
+    for (const city of cities) {
+      const distance = Math.sqrt(
+        Math.pow((lat - city.lat) * 111, 2) + 
+        Math.pow((lng - city.lng) * 111 * Math.cos(lat * Math.PI / 180), 2)
+      );
+      if (distance < minDistance && distance < 100) {
+        minDistance = distance;
+        closestCity = city;
+      }
+    }
+    
+    if (closestCity) {
+      // Density decreases with distance from city center
+      const densityFactor = Math.max(0.1, 1 - (minDistance / 100));
+      return closestCity.density * densityFactor;
+    }
+    
+    // Default densities based on latitude (rough approximation)
+    // Oceans have 0 density
+    if (location.type === 'ocean') return 0;
+    
+    // Desert/sparse areas (30-35° latitude bands)
+    if ((Math.abs(lat) > 20 && Math.abs(lat) < 40) && 
+        ((lng > -20 && lng < 60) || (lng > -120 && lng < -100))) {
+      return 5; // Very low density
+    }
+    
+    // General land areas
+    return 50; // Rural/suburban default
+  };
+  
+  const urbanDensity = getPopulationDensity(location.lat, location.lng);
   const affectedArea = Math.PI * Math.pow(blastRadius / 1000, 2); // km²
   const affectedPopulation = Math.floor(affectedArea * urbanDensity);
-  const estimatedCasualties = Math.floor(affectedPopulation * 0.5); // 50% casualty rate in blast zone
+  const estimatedCasualties = Math.floor(affectedPopulation * 0.6); // 60% casualty rate in blast zone
   
   // Impact classification
   let impactClass: string;

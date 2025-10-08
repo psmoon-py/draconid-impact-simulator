@@ -20,11 +20,12 @@ interface ImpactZones {
 
 interface InteractiveMapProps {
   impactZones?: ImpactZones;
-  onLocationSelect: (lat: number, lng: number, locationName: string) => void;
+  onLocationSelect?: (lat: number, lng: number, locationName: string) => void;
   initialLocation?: { lat: number; lng: number; name: string };
+  readOnly?: boolean;
 }
 
-export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation }: InteractiveMapProps) => {
+export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation, readOnly = false }: InteractiveMapProps) => {
   const mapElRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -61,10 +62,12 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation 
       </div>`
     );
 
-    // Click to choose location
-    map.on('click', async (e: L.LeafletMouseEvent) => {
-      await handleLocationSelect(e.latlng.lat, e.latlng.lng, map);
-    });
+    // Click to choose location (only if not read-only)
+    if (!readOnly) {
+      map.on('click', async (e: L.LeafletMouseEvent) => {
+        await handleLocationSelect(e.latlng.lat, e.latlng.lng, map);
+      });
+    }
 
     mapRef.current = map;
   }, []);
@@ -197,6 +200,8 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation 
   }, [impactZones, targetLocation]);
 
   const handleLocationSelect = async (lat: number, lng: number, map?: L.Map) => {
+    if (readOnly) return; // Prevent selection in read-only mode
+    
     setTargetLocation([lat, lng]);
 
     // Reverse geocoding to get location name
@@ -207,10 +212,14 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation 
       const data = await response.json();
       const name = (data.display_name?.split(',')[0] as string) || 'Selected Location';
       setLocationName(name);
-      onLocationSelect(lat, lng, name);
+      if (onLocationSelect) {
+        onLocationSelect(lat, lng, name);
+      }
     } catch (error) {
       setLocationName('Selected Location');
-      onLocationSelect(lat, lng, 'Selected Location');
+      if (onLocationSelect) {
+        onLocationSelect(lat, lng, 'Selected Location');
+      }
     }
 
     if (map) {
@@ -231,19 +240,21 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation 
 
   return (
     <div className="w-full h-full space-y-4">
-      {/* Preset Location Buttons */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {presetLocations.map((location) => (
-          <button
-            key={location.name}
-            onClick={() => handleLocationSelect(location.coords[0], location.coords[1])}
-            className="px-3 py-1.5 text-xs rounded-lg bg-card border border-primary/30 hover:bg-primary/10 hover:border-primary transition-all"
-          >
-            <Target className="w-3 h-3 inline mr-1" />
-            {location.name}
-          </button>
-        ))}
-      </div>
+      {/* Preset Location Buttons - only show if not read-only */}
+      {!readOnly && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {presetLocations.map((location) => (
+            <button
+              key={location.name}
+              onClick={() => handleLocationSelect(location.coords[0], location.coords[1])}
+              className="px-3 py-1.5 text-xs rounded-lg bg-card border border-primary/30 hover:bg-primary/10 hover:border-primary transition-all"
+            >
+              <Target className="w-3 h-3 inline mr-1" />
+              {location.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Map Container */}
       <div className="h-[500px] rounded-xl overflow-hidden cosmic-border" style={{ background: '#0a0e27' }}>
@@ -251,12 +262,14 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation 
       </div>
 
       {/* Instructions */}
-      <div className="p-4 rounded-lg bg-card/50 backdrop-blur-sm border border-primary/30">
-        <p className="text-sm text-muted-foreground">
-          <Target className="w-4 h-4 inline mr-2 text-primary" />
-          Click anywhere on the map to select impact location, or use preset buttons above
-        </p>
-      </div>
+      {!readOnly && (
+        <div className="p-4 rounded-lg bg-card/50 backdrop-blur-sm border border-primary/30">
+          <p className="text-sm text-muted-foreground">
+            <Target className="w-4 h-4 inline mr-2 text-primary" />
+            Click anywhere on the map to select impact location, or use preset buttons above
+          </p>
+        </div>
+      )}
     </div>
   );
 };
