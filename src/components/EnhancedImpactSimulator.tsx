@@ -25,20 +25,24 @@ export const EnhancedImpactSimulator = () => {
   });
   const [results, setResults] = useState<DetailedImpactResults | null>(null);
 
-  const handleLocationSelect = (lat: number, lng: number, locationName: string) => {
-    // Simple ocean detection (very basic)
-    const isOcean = Math.abs(lat) < 60 && (
-      (lng > -180 && lng < -60) || // Pacific
-      (lng > -40 && lng < 20) || // Atlantic
-      (lng > 40 && lng < 150) // Indian/Pacific
-    );
-    
-    setLocation({
-      lat,
-      lng,
-      name: locationName,
-      type: isOcean ? 'ocean' : 'land'
-    });
+  const handleLocationSelect = (lat: number, lng: number, locationName: string, locationType?: 'land' | 'ocean') => {
+    const type = locationType ?? 'land';
+
+    // Update selected location in state
+    setLocation({ lat, lng, name: locationName, type });
+
+    // If results already exist, auto-recalculate with the new location so the Results tab stays accurate
+    if (results) {
+      const params: AsteroidParameters = {
+        diameter: diameter[0],
+        material: selectedMaterial,
+        velocity: velocity[0],
+        angle: angle[0],
+        location: { lat, lng, name: locationName, type }
+      };
+      const impactResults = calculateDetailedImpact(params);
+      setResults(impactResults);
+    }
   };
 
   const calculateImpact = () => {

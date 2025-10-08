@@ -20,7 +20,7 @@ interface ImpactZones {
 
 interface InteractiveMapProps {
   impactZones?: ImpactZones;
-  onLocationSelect?: (lat: number, lng: number, locationName: string) => void;
+  onLocationSelect?: (lat: number, lng: number, locationName: string, locationType?: 'land' | 'ocean') => void;
   initialLocation?: { lat: number; lng: number; name: string };
   readOnly?: boolean;
 }
@@ -156,13 +156,14 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation,
         fillOpacity: 0.4,
       }).addTo(map).bindTooltip(
         '<strong style="color:#ff4444">Crater Zone</strong><br/>Complete devastation<br/>Total destruction of all structures',
-        { permanent: false, sticky: true }
+        { permanent: false, sticky: true, direction: 'top' }
       );
     } else {
       craterCircleRef.current.setLatLng(targetLocation);
       craterCircleRef.current.setRadius(impactZones.crater);
       craterCircleRef.current.setStyle({ color: '#ff4444', fillColor: '#ff4444', fillOpacity: 0.4, weight: 2 });
     }
+    craterCircleRef.current?.bringToFront();
 
     if (!blastCircleRef.current) {
       blastCircleRef.current = L.circle(targetLocation, {
@@ -173,13 +174,14 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation,
         fillOpacity: 0.2,
       }).addTo(map).bindTooltip(
         '<strong style="color:#ff8800">Blast Zone</strong><br/>Severe structural damage<br/>Building collapse, high casualties',
-        { permanent: false, sticky: true }
+        { permanent: false, sticky: true, direction: 'top' }
       );
     } else {
       blastCircleRef.current.setLatLng(targetLocation);
       blastCircleRef.current.setRadius(impactZones.blast);
       blastCircleRef.current.setStyle({ color: '#ff8800', fillColor: '#ff8800', fillOpacity: 0.2, weight: 2 });
     }
+    blastCircleRef.current?.bringToFront();
 
     if (!thermalCircleRef.current) {
       thermalCircleRef.current = L.circle(targetLocation, {
@@ -190,42 +192,54 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation,
         fillOpacity: 0.15,
       }).addTo(map).bindTooltip(
         '<strong style="color:#ffaa00">Thermal Zone</strong><br/>3rd degree burns<br/>Fires ignited, heat radiation damage',
-        { permanent: false, sticky: true }
+        { permanent: false, sticky: true, direction: 'top' }
       );
     } else {
       thermalCircleRef.current.setLatLng(targetLocation);
       thermalCircleRef.current.setRadius(impactZones.thermal);
       thermalCircleRef.current.setStyle({ color: '#ffaa00', fillColor: '#ffaa00', fillOpacity: 0.15, weight: 2 });
     }
+    thermalCircleRef.current?.bringToFront();
   }, [impactZones, targetLocation]);
 
   const handleLocationSelect = async (lat: number, lng: number, map?: L.Map) => {
     if (readOnly) return; // Prevent selection in read-only mode
-    
+
     setTargetLocation([lat, lng]);
 
-    // Reverse geocoding to get location name
     try {
+      // Reverse geocoding with details to infer land/ocean
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&extratags=1`
       );
       const data = await response.json();
+
+      const addr = data?.address || {};
       const name = (data.display_name?.split(',')[0] as string) || 'Selected Location';
+
+      // Determine if point is over ocean/sea/water bodies
+      const waterKeys = ['ocean', 'sea', 'bay', 'gulf', 'strait', 'fjord', 'lagoon'];
+      const hasWaterKey = waterKeys.some((k) => !!addr[k]);
+      const category = (data?.category || data?.class || '').toString();
+      const type = (data?.type || data?.addresstype || '').toString();
+      const isOcean = hasWaterKey || category === 'water' || type === 'water' || type === 'coastline';
+
       setLocationName(name);
       if (onLocationSelect) {
-        onLocationSelect(lat, lng, name);
+        onLocationSelect(lat, lng, name, isOcean ? 'ocean' : 'land');
       }
     } catch (error) {
       setLocationName('Selected Location');
       if (onLocationSelect) {
-        onLocationSelect(lat, lng, 'Selected Location');
+        onLocationSelect(lat, lng, 'Selected Location', 'land');
       }
     }
 
+    const target = [lat, lng] as [number, number];
     if (map) {
-      map.setView([lat, lng]);
+      map.setView(target);
     } else if (mapRef.current) {
-      mapRef.current.setView([lat, lng]);
+      mapRef.current.setView(target);
     }
   };
 
@@ -258,7 +272,7 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation,
 
       {/* Map Container */}
       <div className="h-[500px] rounded-xl overflow-hidden cosmic-border" style={{ background: '#0a0e27' }}>
-        <div ref={mapElRef} style={{ height: '100%', width: '100%' }} />
+        <div ref={mapElRef} style={{ height: '100%', width: '100%', cursor: readOnly ? 'default' : 'crosshair' }} />
       </div>
 
       {/* Instructions */}

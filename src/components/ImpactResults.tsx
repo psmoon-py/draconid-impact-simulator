@@ -37,7 +37,8 @@ export const ImpactResults = ({ results, location }: ImpactResultsProps) => {
   };
 
   const downloadPDF = async () => {
-    const toastId = toast.loading("Generating PDF report...");
+    const id = `pdf-${Date.now()}`;
+    toast.loading("Generating PDF report...", { id });
     try {
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pageWidth = pdf.internal.pageSize.getWidth();
@@ -119,12 +120,10 @@ export const ImpactResults = ({ results, location }: ImpactResultsProps) => {
       pdf.text(new Date().toLocaleDateString(), pageWidth / 2, pageHeight - 5, { align: 'center' });
       
       pdf.save(`impact-report-${location.name.replace(/\s+/g, '-')}.pdf`);
-      toast.dismiss(toastId);
-      toast.success("PDF downloaded successfully!");
+      toast.success("PDF downloaded successfully!", { id, duration: 2500 });
     } catch (error) {
       console.error('Error generating PDF:', error);
-      toast.dismiss(toastId);
-      toast.error("Failed to generate PDF");
+      toast.error("Failed to generate PDF", { id, duration: 3000 });
     }
   };
 
