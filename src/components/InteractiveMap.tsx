@@ -208,9 +208,9 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation,
     setTargetLocation([lat, lng]);
 
     try {
-      // Determine land/ocean using Natural Earth land polygons (world-atlas)
+      // Determine land/ocean using Natural Earth land polygons (CDN-hosted)
       const { detectLocationType } = await import("@/utils/geoutils");
-      const locType = detectLocationType(lat, lng);
+      const locType = await detectLocationType(lat, lng);
 
       // Reverse geocoding for a nice display name (OSM Nominatim)
       const response = await fetch(
@@ -225,6 +225,7 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation,
         onLocationSelect(lat, lng, name, locType);
       }
     } catch (error) {
+      console.error('Location detection error:', error);
       setLocationName('Selected Location');
       if (onLocationSelect) {
         onLocationSelect(lat, lng, 'Selected Location', 'land');
