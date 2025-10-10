@@ -120,12 +120,10 @@ export const ImpactResults = ({ results, location }: ImpactResultsProps) => {
       pdf.text(new Date().toLocaleDateString(), pageWidth / 2, pageHeight - 5, { align: 'center' });
       
       pdf.save(`impact-report-${location.name.replace(/\s+/g, '-')}.pdf`);
-      toast.dismiss(id);
-      toast.success("PDF downloaded successfully!", { duration: 2500 });
+      toast.success("PDF downloaded successfully!", { id, duration: 2500 });
     } catch (error) {
       console.error('Error generating PDF:', error);
-      toast.dismiss(id);
-      toast.error("Failed to generate PDF", { duration: 3000 });
+      toast.error("Failed to generate PDF", { id, duration: 3000 });
     }
   };
 

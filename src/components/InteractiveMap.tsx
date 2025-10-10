@@ -155,7 +155,7 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation,
         fillColor: '#ff4444',
         fillOpacity: 0.4,
       }).addTo(map).bindTooltip(
-        '<strong style="color:#ff4444">Crater Zone</strong><br/>Peak shock >100 GPa<br/>Total vaporization near impact point',
+        '<strong style="color:#ff4444">Crater Zone</strong><br/>Complete devastation<br/>Total destruction of all structures',
         { permanent: false, sticky: true, direction: 'top' }
       );
     } else {
@@ -173,7 +173,7 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation,
         fillColor: '#ff8800',
         fillOpacity: 0.2,
       }).addTo(map).bindTooltip(
-        '<strong style="color:#ff8800">Blast Zone</strong><br/>Overpressure >3–5 psi<br/>Severe damage and building collapse',
+        '<strong style="color:#ff8800">Blast Zone</strong><br/>Severe structural damage<br/>Building collapse, high casualties',
         { permanent: false, sticky: true, direction: 'top' }
       );
     } else {
@@ -191,7 +191,7 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation,
         fillColor: '#ffaa00',
         fillOpacity: 0.15,
       }).addTo(map).bindTooltip(
-        '<strong style="color:#ffaa00">Thermal Zone</strong><br/>Thermal flux >10 cal/cm²<br/>3rd degree burns, fires ignited',
+        '<strong style="color:#ffaa00">Thermal Zone</strong><br/>3rd degree burns<br/>Fires ignited, heat radiation damage',
         { permanent: false, sticky: true, direction: 'top' }
       );
     } else {
@@ -208,24 +208,27 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation,
     setTargetLocation([lat, lng]);
 
     try {
-      // Determine land/ocean using Natural Earth land polygons (CDN-hosted)
-      const { detectLocationType } = await import("@/utils/geoutils");
-      const locType = await detectLocationType(lat, lng);
-
-      // Reverse geocoding for a nice display name (OSM Nominatim)
+      // Reverse geocoding with details to infer land/ocean
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&extratags=1`
       );
       const data = await response.json();
 
-      const name = (data?.display_name?.split(',')[0] as string) || 'Selected Location';
+      const addr = data?.address || {};
+      const name = (data.display_name?.split(',')[0] as string) || 'Selected Location';
+
+      // Determine if point is over ocean/sea/water bodies
+      const waterKeys = ['ocean', 'sea', 'bay', 'gulf', 'strait', 'fjord', 'lagoon'];
+      const hasWaterKey = waterKeys.some((k) => !!addr[k]);
+      const category = (data?.category || data?.class || '').toString();
+      const type = (data?.type || data?.addresstype || '').toString();
+      const isOcean = hasWaterKey || category === 'water' || type === 'water' || type === 'coastline';
 
       setLocationName(name);
       if (onLocationSelect) {
-        onLocationSelect(lat, lng, name, locType);
+        onLocationSelect(lat, lng, name, isOcean ? 'ocean' : 'land');
       }
     } catch (error) {
-      console.error('Location detection error:', error);
       setLocationName('Selected Location');
       if (onLocationSelect) {
         onLocationSelect(lat, lng, 'Selected Location', 'land');
@@ -239,6 +242,7 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation,
       mapRef.current.setView(target);
     }
   };
+
   const presetLocations = [
     { name: 'New York City', coords: [40.7128, -74.0060] as [number, number] },
     { name: 'Tokyo', coords: [35.6762, 139.6503] as [number, number] },

@@ -18,34 +18,21 @@ export function calculateDetailedImpact(params: AsteroidParameters): DetailedImp
   // Angle factor (perpendicular impact = 1.0, grazing = lower)
   const angleFactor = Math.sin(angle * Math.PI / 180);
   
-  // Crater calculations using Collins et al. (2005) scaling
-  const g = 9.81; // gravity (m/s^2)
-  const rho_i = material.density; // impactor density (kg/m^3)
-  const rho_t = location.type === 'ocean' ? 1000 : 2750; // target density: water vs rocky terrain
-
-  let craterDiameter = 0;
-  let craterDepth = 0;
-  let craterVolume = 0;
-
-  if (location.type !== 'ocean') {
-    // Transient crater diameter (meters)
-    const Dtc = 1.161
-      * Math.pow(rho_i / rho_t, 1/3)
-      * Math.pow(diameter, 0.78)
-      * Math.pow(v, 0.44)
-      * Math.pow(g, -0.22)
-      * Math.pow(Math.sin(angle * Math.PI / 180), 1/3);
-
-    // Final crater diameter (simple vs complex)
-    const Dc = 3200; // transition diameter (m) on Earth
-    const isSimple = Dtc < Dc;
-    const Dfr = isSimple ? (1.25 * Dtc) : (1.17 * Math.pow(Dtc, 1.13) * Math.pow(Dc, -0.13));
-
-    craterDiameter = Dfr;
-    craterDepth = isSimple ? (Dfr / 5) : (Dfr / 10);
-    craterVolume = (2/3) * Math.PI * Math.pow(Dfr/2, 2) * craterDepth; // bowl approximation
-  }
-
+  // Crater calculations (using scaling laws)
+  const g = 9.81; // gravity
+  const targetDensity = location.type === 'ocean' ? 1000 : 2700; // water vs rock
+  
+  // Crater diameter (modified Pi-group scaling)
+  const craterDiameter = 1.161 * Math.pow(
+    (energyJoules * angleFactor) / (targetDensity * g),
+    0.22
+  );
+  
+  // Crater depth (approximately 1/5 to 1/3 of diameter)
+  const craterDepth = craterDiameter / 5;
+  
+  // Crater volume (hemispherical approximation)
+  const craterVolume = (2/3) * Math.PI * Math.pow(craterDiameter/2, 2) * craterDepth;
   
   // Blast radius calculations
   // Overpressure zones: >20 psi = total destruction, >5 psi = severe damage
