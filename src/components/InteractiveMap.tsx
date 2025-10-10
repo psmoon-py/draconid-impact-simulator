@@ -49,16 +49,6 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation,
       preferCanvas: true,
     });
 
-    // Disable interactions in read-only mode but allow hover tooltips
-    if (readOnly) {
-      map.dragging.disable();
-      map.scrollWheelZoom.disable();
-      map.doubleClickZoom.disable();
-      map.boxZoom.disable();
-      map.keyboard.disable();
-      (map as any).touchZoom?.disable?.();
-    }
-
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; OpenStreetMap',
     }).addTo(map);
@@ -164,14 +154,10 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation,
         weight: 2,
         fillColor: '#ff4444',
         fillOpacity: 0.4,
-      })
-        .addTo(map)
-        .bindTooltip(
-          '<strong style="color:#ff4444">Crater Zone</strong><br/>Complete devastation<br/>Total destruction of all structures',
-          { permanent: false, sticky: true, direction: 'top' }
-        );
-      craterCircleRef.current.on('mouseover', () => craterCircleRef.current?.openTooltip());
-      craterCircleRef.current.on('mouseout', () => craterCircleRef.current?.closeTooltip());
+      }).addTo(map).bindTooltip(
+        '<strong style="color:#ff4444">Crater Zone</strong><br/>Complete devastation<br/>Total destruction of all structures',
+        { permanent: false, sticky: true, direction: 'top' }
+      );
     } else {
       craterCircleRef.current.setLatLng(targetLocation);
       craterCircleRef.current.setRadius(impactZones.crater);
@@ -186,14 +172,10 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation,
         weight: 2,
         fillColor: '#ff8800',
         fillOpacity: 0.2,
-      })
-        .addTo(map)
-        .bindTooltip(
-          '<strong style="color:#ff8800">Blast Zone</strong><br/>Severe structural damage<br/>Building collapse, high casualties',
-          { permanent: false, sticky: true, direction: 'top' }
-        );
-      blastCircleRef.current.on('mouseover', () => blastCircleRef.current?.openTooltip());
-      blastCircleRef.current.on('mouseout', () => blastCircleRef.current?.closeTooltip());
+      }).addTo(map).bindTooltip(
+        '<strong style="color:#ff8800">Blast Zone</strong><br/>Severe structural damage<br/>Building collapse, high casualties',
+        { permanent: false, sticky: true, direction: 'top' }
+      );
     } else {
       blastCircleRef.current.setLatLng(targetLocation);
       blastCircleRef.current.setRadius(impactZones.blast);
@@ -208,14 +190,10 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation,
         weight: 2,
         fillColor: '#ffaa00',
         fillOpacity: 0.15,
-      })
-        .addTo(map)
-        .bindTooltip(
-          '<strong style="color:#ffaa00">Thermal Zone</strong><br/>3rd degree burns<br/>Fires ignited, heat radiation damage',
-          { permanent: false, sticky: true, direction: 'top' }
-        );
-      thermalCircleRef.current.on('mouseover', () => thermalCircleRef.current?.openTooltip());
-      thermalCircleRef.current.on('mouseout', () => thermalCircleRef.current?.closeTooltip());
+      }).addTo(map).bindTooltip(
+        '<strong style="color:#ffaa00">Thermal Zone</strong><br/>3rd degree burns<br/>Fires ignited, heat radiation damage',
+        { permanent: false, sticky: true, direction: 'top' }
+      );
     } else {
       thermalCircleRef.current.setLatLng(targetLocation);
       thermalCircleRef.current.setRadius(impactZones.thermal);
@@ -239,14 +217,12 @@ export const InteractiveMap = ({ impactZones, onLocationSelect, initialLocation,
       const addr = data?.address || {};
       const name = (data.display_name?.split(',')[0] as string) || 'Selected Location';
 
-      // Determine if point is over ocean/sea/water bodies with robust checks
+      // Determine if point is over ocean/sea/water bodies
       const waterKeys = ['ocean', 'sea', 'bay', 'gulf', 'strait', 'fjord', 'lagoon'];
       const hasWaterKey = waterKeys.some((k) => !!addr[k]);
       const category = (data?.category || data?.class || '').toString();
       const type = (data?.type || data?.addresstype || '').toString();
-      const landIndicators = ['country', 'state', 'region', 'city', 'town', 'village', 'hamlet', 'county', 'postcode', 'road'];
-      const hasLand = landIndicators.some((k) => !!addr[k]);
-      const isOcean = !hasLand && (hasWaterKey || category === 'water' || ['water', 'coastline'].includes(type));
+      const isOcean = hasWaterKey || category === 'water' || type === 'water' || type === 'coastline';
 
       setLocationName(name);
       if (onLocationSelect) {
