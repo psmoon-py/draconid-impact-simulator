@@ -199,12 +199,21 @@ export const EnhancedImpactSimulator = () => {
 
             {/* Live Preview */}
             <Card className="p-6 space-y-6 cosmic-border bg-card/50 backdrop-blur-sm">
-              <h3 className="text-xl font-semibold text-primary">Live Preview</h3>
+              <h3 className="text-xl font-semibold text-primary">Asteroid Preview</h3>
               
               <div className="space-y-4">
                 <div className="p-4 rounded-lg bg-muted/30 border border-primary/20">
                   <div className="text-center space-y-2">
-                    <div className="text-6xl">☄️</div>
+                    <div className="relative w-full h-32 rounded-lg overflow-hidden bg-black/50">
+                      <img
+                        src={selectedMaterial.imageUrl || 'https://solarsystem.nasa.gov/system/stellar_items/image_files/705_feature_1600x900_eros.jpg'}
+                        alt={selectedMaterial.name}
+                        className="w-full h-full object-cover opacity-80"
+                      />
+                      <div className="absolute bottom-1 right-1 text-xs text-white/60 bg-black/50 px-2 py-0.5 rounded">
+                        {selectedMaterial.credit || 'NASA'}
+                      </div>
+                    </div>
                     <p className="font-mono text-2xl text-primary">{diameter[0]}m</p>
                     <p className="text-sm text-muted-foreground">{selectedMaterial.name}</p>
                   </div>

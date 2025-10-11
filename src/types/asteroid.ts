@@ -5,6 +5,8 @@ export interface AsteroidMaterial {
   description: string;
   color: string;
   examples: string;
+  imageUrl?: string;
+  credit?: string;
 }
 
 export const ASTEROID_MATERIALS: AsteroidMaterial[] = [
@@ -14,7 +16,9 @@ export const ASTEROID_MATERIALS: AsteroidMaterial[] = [
     density: 7870,
     description: 'Dense metallic asteroid composed of iron-nickel alloy. Maximum penetration and devastation.',
     color: '#8B7355',
-    examples: 'Psyche, M-type asteroids (~5%)'
+    examples: 'Psyche, M-type asteroids (~5%)',
+    imageUrl: 'https://solarsystem.nasa.gov/system/resources/detail_files/788_psyche-16.jpg',
+    credit: 'NASA/JPL-Caltech/ASU'
   },
   {
     id: 'stone',
@@ -22,7 +26,9 @@ export const ASTEROID_MATERIALS: AsteroidMaterial[] = [
     density: 3000,
     description: 'Most common asteroid type made of silicate rock. Moderate density and typical impact effects.',
     color: '#A0826D',
-    examples: 'Eros, Itokawa (~17% of all)'
+    examples: 'Eros, Itokawa (~17% of all)',
+    imageUrl: 'https://solarsystem.nasa.gov/system/stellar_items/image_files/705_feature_1600x900_eros.jpg',
+    credit: 'NASA/JHUAPL'
   },
   {
     id: 'carbon',
@@ -30,7 +36,9 @@ export const ASTEROID_MATERIALS: AsteroidMaterial[] = [
     density: 2000,
     description: 'Primitive carbon-rich asteroids with water. Dark and ancient composition.',
     color: '#3D3D3D',
-    examples: 'Bennu, Ryugu (~75% of all)'
+    examples: 'Bennu, Ryugu (~75% of all)',
+    imageUrl: 'https://solarsystem.nasa.gov/system/stellar_items/image_files/795_feature_1600x900_bennu.jpg',
+    credit: 'NASA/Goddard/University of Arizona'
   },
   {
     id: 'ice',
@@ -38,7 +46,9 @@ export const ASTEROID_MATERIALS: AsteroidMaterial[] = [
     density: 1000,
     description: 'Icy bodies from outer solar system. Low density but extremely high velocity impacts.',
     color: '#B4D7E5',
-    examples: "Halley's Comet, 67P"
+    examples: "Halley's Comet, 67P",
+    imageUrl: 'https://solarsystem.nasa.gov/system/resources/detail_files/934_PIA19403.jpg',
+    credit: 'ESA/Rosetta/NAVCAM'
   },
   {
     id: 'gold',

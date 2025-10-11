@@ -1,27 +1,31 @@
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Target, Lightbulb, Atom } from "lucide-react";
+import { Shield, Target, Atom, Database, ExternalLink } from "lucide-react";
+import { Button } from "./ui/button";
+import { useState } from "react";
 
 export const EducationalPanel = () => {
+  const [activeTab, setActiveTab] = useState("physics");
+
   return (
     <div className="w-full max-w-7xl mx-auto">
-      <Tabs defaultValue="defense" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4 bg-card/50 backdrop-blur-sm">
-          <TabsTrigger value="defense" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Shield className="w-4 h-4 mr-2" />
-            Defense
-          </TabsTrigger>
-          <TabsTrigger value="detection" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Target className="w-4 h-4 mr-2" />
-            Detection
-          </TabsTrigger>
           <TabsTrigger value="physics" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Atom className="w-4 h-4 mr-2" />
             Physics
           </TabsTrigger>
-          <TabsTrigger value="facts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Lightbulb className="w-4 h-4 mr-2" />
-            Facts
+          <TabsTrigger value="defense" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Shield className="w-4 h-4 mr-2" />
+            Defense
+          </TabsTrigger>
+          <TabsTrigger value="observation" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Target className="w-4 h-4 mr-2" />
+            Observation
+          </TabsTrigger>
+          <TabsTrigger value="datasets" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Database className="w-4 h-4 mr-2" />
+            Datasets
           </TabsTrigger>
         </TabsList>
 
@@ -69,7 +73,7 @@ export const EducationalPanel = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="detection" className="mt-6">
+        <TabsContent value="observation" className="mt-6">
           <Card className="p-6 cosmic-border bg-card/50 backdrop-blur-sm space-y-4">
             <h3 className="text-2xl font-bold text-primary">Detection & Monitoring Systems</h3>
             
@@ -145,7 +149,63 @@ export const EducationalPanel = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="facts" className="mt-6">
+        <TabsContent value="datasets" className="mt-6">
+          <Card className="p-6 cosmic-border bg-card/50 backdrop-blur-sm space-y-4">
+            <h3 className="text-2xl font-bold text-primary">Scientific Datasets & Sources</h3>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-primary/10 border border-primary/30">
+                <div className="flex items-start justify-between mb-2">
+                  <h4 className="font-semibold text-lg">Collins-Melosh-Marcus Impact Physics</h4>
+                  <Button size="sm" variant="ghost" onClick={() => window.open('https://doi.org/10.1111/j.1945-5100.2005.tb00157.x', '_blank')}>
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Peer-reviewed scaling laws for crater formation, thermal effects, and blast physics. 
+                  Collins et al. (2005) provides the industry-standard formulas used in this simulator.
+                </p>
+              </div>
+              <div className="p-4 rounded-lg bg-secondary/10 border border-secondary/30">
+                <div className="flex items-start justify-between mb-2">
+                  <h4 className="font-semibold text-lg">NASA SBDB & CNEOS</h4>
+                  <Button size="sm" variant="ghost" onClick={() => window.open('https://ssd.jpl.nasa.gov/', '_blank')}>
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Small-Body Database Browser and Center for NEO Studies provide real-time orbital data, 
+                  close approach information, and impact risk assessments for all known NEOs.
+                </p>
+              </div>
+              <div className="p-4 rounded-lg bg-accent/10 border border-accent/30">
+                <div className="flex items-start justify-between mb-2">
+                  <h4 className="font-semibold text-lg">GHSL & WorldPop Demographics</h4>
+                  <Button size="sm" variant="ghost" onClick={() => window.open('https://ghsl.jrc.ec.europa.eu/', '_blank')}>
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Global Human Settlement Layer and WorldPop datasets provide 1km resolution population 
+                  density grids for accurate casualty modeling based on impact location.
+                </p>
+              </div>
+              <div className="p-4 rounded-lg bg-muted/30 border border-muted">
+                <div className="flex items-start justify-between mb-2">
+                  <h4 className="font-semibold text-lg">NOAA ETOPO1 Bathymetry</h4>
+                  <Button size="sm" variant="ghost" onClick={() => window.open('https://www.ncei.noaa.gov/products/etopo-global-relief-model', '_blank')}>
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  1 arc-minute global relief model integrating land topography and ocean bathymetry 
+                  for accurate land/ocean detection and tsunami modeling.
+                </p>
+              </div>
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="facts" className="mt-6" style={{ display: 'none' }}>
           <Card className="p-6 cosmic-border bg-card/50 backdrop-blur-sm space-y-4">
             <h3 className="text-2xl font-bold text-primary">Fascinating Facts</h3>
             

@@ -1,5 +1,5 @@
 import { Hero } from "@/components/Hero";
-import { SolarSystemViewer } from "@/components/SolarSystemViewer";
+import { Enhanced3DViewer } from "@/components/Enhanced3DViewer";
 import { EnhancedImpactSimulator } from "@/components/EnhancedImpactSimulator";
 import { NASADataFeed } from "@/components/NASADataFeed";
 import { EducationalPanel } from "@/components/EducationalPanel";
@@ -14,8 +14,8 @@ const Index = () => {
       {/* Simulator Section */}
       <section id="simulator" className="py-20 px-4">
         <div className="max-w-7xl mx-auto space-y-16">
-          {/* Live Solar System Tracker */}
-          <SolarSystemViewer />
+          {/* Live 3D Solar System Viewer */}
+          <Enhanced3DViewer />
 
           <Separator className="bg-border/50" />
 
